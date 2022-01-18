@@ -8,6 +8,5 @@ gobject-introspection-dev
 gtk3-dev
 libpng-dev
 pango-dev
-rust-std32
 rustc
 zlib-dev
