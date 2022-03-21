@@ -1,24 +1,91 @@
 ==============
-Version 2.52.7
+Version 2.54.0
 ==============
 
-Backport a fix for the regression that was introduced in the last
-release:
+This is a summary of the 2.53.x release notes; you can also read them
+for more detail.  Not many new features; we've been working on
+infrastructure and documentation.
+
+- Librsvg now supports SVG2 geometry properties for these elements:
+  rect, circle, ellipse, image, svg (Jeremias Ortega).
+
+- #721 - Catch circular references when rendering patterns.
+
+- The C API documentation now uses gi-docgen instead of gtk-doc.
+  Rsvg-convert's man page is now converted to reStructuredText instead
+  of troff.
+
+- The "Recommendations for applications" chapter in the documentation
+  is much improved!
+
+==============
+Version 2.53.2
+==============
 
 - #851 - Output filled text as text for PDF; fixes regression due to
   outputting all text as paths.
 
+- Fix taller-than-wide proportional scaling and size limiting in
+  rsvg-convert.
+
+- #772, #773, #774, #775, #776 - Implement SVG2 geometry properties
+  for these elements: rect, circle, ellipse, image, svg (Jeremias
+  Ortega).
+
+- #450 - Fix potential unaligned accesses in surface iterators
+  (Michael Howell).
+
+- Actually use GDK_PIXBUF_MODULEDIR when calling
+  gdk-pixbuf-query-loaders (Fabrice Fontaine).
+
+- Windows build fixes (Chun-wei Fan).
+
+- Add links to functions and types throughout the C API documentation.
+
 ==============
-Version 2.52.6
+Version 2.53.1
 ==============
 
-Backport a fix from the main branch:
+While it is not a user-visible change, Jordan Petridis has ported
+librsvg's Continuous Integration (CI) infrastructure to use
+Freedesktop CI Templates.  This lets us test librsvg easily on
+different environments.  If you want your environment tested, now is
+the time to add it!
 
 - #599 - Fix incorrect text rendering when text has different scales
   in the X/Y axes.  This regressed after librsvg 2.52.5, when Pango
   had to revert its fix for the same bug.  Now librsvg renders all
   text as paths, and does the scaling itself.  Please file a bug if
   you have evidence that this presents a performance problem for you.
+
+- Update to the latest gtk-rs release (Bilal Elmoussaoui).
+
+- Port to Freedesktop CI Templates (Jordan Petridis).
+
+- Visual Studio builds can work from a git checkout now (Chun-wei Fan)
+
+- Windows build fixes (Martin Hertz, Chun-wei Fan)
+
+==============
+Version 2.53.0
+==============
+
+This is the first release in the new development series.  There are no
+new features, just changes to how the documentation is built.
+
+The man page for rsvg-convert is now generated from a reStructuredText
+document, and the C API reference is generated using gi-docgen.
+
+Please make sure you install python3-docutils (for rst2man) and
+gi-docgen before compiling librsvg from a tarball.
+
+- #755 - rsvg-convert's man page is now generated from reStructuredText.
+
+- #827 - Move C API reference to gi-docgen.
+
+- Test suite updates (Michael Howell).
+
+- Link against bcrypt for Visual Studio builds (Martin Hertz).
 
 ==============
 Version 2.52.5
