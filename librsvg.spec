@@ -4,7 +4,7 @@
 #
 Name     : librsvg
 Version  : 2.54.0
-Release  : 78
+Release  : 79
 URL      : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.0.tar.xz
 Source0  : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.0.tar.xz
 Summary  : library that renders svg files
@@ -19,7 +19,6 @@ BuildRequires : atk-dev
 BuildRequires : buildreq-configure
 BuildRequires : buildreq-gnome
 BuildRequires : cargo
-BuildRequires : docutils
 BuildRequires : freetype-dev
 BuildRequires : fribidi-dev
 BuildRequires : gi-docgen
@@ -42,6 +41,7 @@ BuildRequires : pkgconfig(libcroco-0.6)
 BuildRequires : pkgconfig(libxml-2.0)
 BuildRequires : pkgconfig(pangocairo)
 BuildRequires : pkgconfig(pangoft2)
+BuildRequires : pypi-docutils
 BuildRequires : rustc
 BuildRequires : zlib-dev
 Patch1: backport-nodocs.patch
@@ -126,7 +126,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1647880074
+export SOURCE_DATE_EPOCH=1649966943
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -147,7 +147,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1647880074
+export SOURCE_DATE_EPOCH=1649966943
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/librsvg
 cp %{_builddir}/librsvg-2.54.0/COPYING.LIB %{buildroot}/usr/share/package-licenses/librsvg/01a6b4bf79aca9b556822601186afab86e8c4fbf

@@ -10,3 +10,4 @@ libpng-dev
 pango-dev
 rustc
 zlib-dev
+gi-docgen
