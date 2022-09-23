@@ -4,7 +4,7 @@
 #
 Name     : librsvg
 Version  : 2.54.5
-Release  : 87
+Release  : 88
 URL      : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.5.tar.xz
 Source0  : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.5.tar.xz
 Summary  : library that renders svg files
