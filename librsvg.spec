@@ -4,7 +4,7 @@
 #
 Name     : librsvg
 Version  : 2.54.5
-Release  : 89
+Release  : 90
 URL      : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.5.tar.xz
 Source0  : https://download.gnome.org/sources/librsvg/2.54/librsvg-2.54.5.tar.xz
 Summary  : library that renders svg files
@@ -121,7 +121,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1663951499
+export SOURCE_DATE_EPOCH=1664158783
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -142,7 +142,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1663951499
+export SOURCE_DATE_EPOCH=1664158783
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/librsvg
 cp %{_builddir}/librsvg-%{version}/COPYING.LIB %{buildroot}/usr/share/package-licenses/librsvg/01a6b4bf79aca9b556822601186afab86e8c4fbf || :
