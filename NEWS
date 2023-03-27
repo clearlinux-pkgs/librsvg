@@ -1,8 +1,165 @@
-Version 2.54.5
+Version 2.56.0
 ==============
+
+- #942: Fix crash when XML files get recursively included through
+  XInclude.  Thanks to Stefan Schiller for catching this.
+
+- When running the suite of reference tests, you can now use the
+  TESTS_OUTPUT_DIR environment variable to specify where results for
+  failures get written.  See tests/README.md for details.
+
+- The minimum supported Rust version (MSRV) is 1.64.
+
+Version 2.55.92
+===============
+
+- #925 - Update to cssparser 0.29.6; this adds support for hwb() color
+  syntax, from the CSS Color Module Level 4 spec
+  (https://drafts.csswg.org/css-color-4/#changes).  Note that values
+  inside hwb() are *not* comma-separated, just whitespace.
+
+- #932 - Fix panic when a requested font-size is too big.
+
+- #930 - Validate all clipPath and mask transforms.
+
+- Add a performance tracking framework.  This is part of an Outreachy
+  internship (Neetu Mehta).
+
+- Slight improvements in the size of generated code and memory consumption.
+
+- The Rust crate is now called "rsvg", for consistency with other
+  crates that don't usually have a "lib" prefix.
+
+- The Rust API documentation is now available at
+  https://gnome.pages.gitlab.gnome.org/librsvg/doc/rsvg/index.html
+
+Version 2.55.91
+===============
+
+The minimum supported Rust version (MSRV) is 1.64, because of the gtk-rs update.
+
+- #929 - Support "turn" unit for CSS <angle> values (Khadija Kamran).
+
+- #743 - Support the feDropShadow element (John Ledbetter, Federico Mena).
+
+- #928 - Fix panic when a feTile filter gets an empty source region.
+
+- Update to gtk-rs 0.17.0 (Bilal Elmoussaoui).
+
+- Simplify the NMake Makefiles for Windows; see win32/MSVC-Builds.md
+  for details (Chun-wei Fan).
+
+- Documentation and infrastructure updates (Andre Klapper, Violet Holland).
+
+- Consolidate the scattered .md documents into the Development Guide.
+  Updated links throughout.
+  (https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/index.html)
+
+- Internal refactoring of the test suite.
+
+- Updated dependencies to avoid duplicated crates.
+
+Version 2.55.90
+===============
+
+The minimum supported Rust version (MSRV) is 1.63.
+
+- #878 - rsvg-convert now supports Tab completion for bash, elvish,
+  fish, powershell, and zsh.  Please run "rsvg-convert --completion bash"
+  to generate the completion file.  You can use the other shells' names
+  as an argument to the --completion option. (Marcos Simental)
+
+- #885 - Support vector-effect="non-scaling-stroke" for paths (Michael Howell).
+
+- #875 - Apply width, height when `<use>`ing an `<svg>` (Michael Howell).
+
+- There is a new development guide for librsvg, for people who want to
+  help in its development.  I hope this will be especially useful to
+  Outreachy and Summer of Code interns:
+  https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/index.html
+
+- #92 - In the use element, honor the overflow:hidden property of a
+  referenced symbol.
+
+- #737 - Treat property and attribute parse errors / invalid values as
+  if they were not present, per the specs.  Previously this would
+  cause the offending element's subtree to not be rendered.
+
+- #913 - Make feGaussianBlur work as a pass-through filter if the stdDeviation is invalid.
+
+- Define missing crate metadata for Cargo.toml (Guillaume Desmottes).
+
+- Add some tests that were missing for the C API.
+
+- Fix the basic test suite in Windows.
+
+- Miscellaneous fixes for the build and CI (Jürg Billeter).
+
+- Plenty of internal refactoring to enable more consistent logging.
+
+- Slight reductions in memory consumption for elements with
+  context-stroke and context-fill.
+
+- Experimental gdk-pixbuf loader in Rust (Alberto Ruiz).  This is not
+  installed yet.
+
+- Update the gtk-rs crates to 0.16.0 (Bilal Elmoussaoui).
+
+- Port rsvg-convert's argument parsing to the clap4 crate (Lukáš Tyrychtr).
+
+- Updates to the dependencies (Kalev Lember, Christoph Reiter, Jordan Petridis).
+
+- The CI now has a cargo-deny step, which should help us notice when
+  there are security advisories for dependencies (Neetu Mehta).
+
+Version 2.55.2
+==============
+
+- #942: Fix crash when XML files get recursively included through
+  XInclude.  Thanks to Stefan Schiller for catching this.
+
+- The Minimum Supported Rust Version (MSRV) is now Rust 1.60.  Several
+  dependencies have bumped their MSRV on their own, unfortunately.
+
+Version 2.55.1
+==============
+
+As an experiment, I'll move librsvg from even-odd versioning (odd
+minor version is unstable, even minor version is stable), to the
+versioning scheme that GNOME uses these days.  So, 2.55.x is the new
+stable series.
+
+* There is a new development guide for librsvg, for people who want to
+  help in its development.  I hope this will be especially useful to
+  Outreachy and Summer of Code interns:
+  https://gnome.pages.gitlab.gnome.org/librsvg/devel-docs/index.html
+
+* Define missing crate metadata for Cargo.toml (Guillaume Desmottes).
+
+* Add some tests that were missing for the C API.
+
+* Fix the basic test suite in Windows.
+
+* Miscellaneous fixes for the build and CI (Jürg Billeter).
+
+Version 2.55.0-alpha
+====================
+
+This is the first release in the new development series.
+
+- The Minimum Supported Rust Version (MSRV) is now Rust 1.58.
+
+- #855: The release tarball no longer contains vendored Rust
+  dependencies.  Most distributions now have infrastructure to pull
+  these themselves, so let's make the tarball smaller.
 
 - #880 - Accept patterns with userSpaceOnUse units for the stroke of
   axis-aligned lines.
+
+- #706: Small reductions in memory consumption of the DOM tree
+  (Michael Howell).
+
+- Updates for the gtk-rs API (Bilal Elmoussaoui).
 
 Version 2.54.4
 ==============
