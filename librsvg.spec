@@ -4,11 +4,11 @@
 # Using build pattern: configure
 #
 Name     : librsvg
-Version  : 2.56.0
-Release  : 92
-URL      : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.0.tar.xz
-Source0  : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.0.tar.xz
-Source1  : http://localhost/cgit/vendor/librsvg/snapshot/librsvg-2023-03-24-21-48-23.tar.xz
+Version  : 2.56.1
+Release  : 93
+URL      : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.1.tar.xz
+Source0  : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.1.tar.xz
+Source1  : http://localhost/cgit/vendor/librsvg/snapshot/librsvg-2023-06-01-22-08-11.tar.xz
 Summary  : library that renders svg files
 Group    : Development/Tools
 License  : 0BSD Apache-2.0 BSD-3-Clause BSL-1.0 HPND ICU LGPL-2.1 MIT MPL-2.0-no-copyleft-exception Unicode-DFS-2016 Unlicense Zlib
@@ -26,9 +26,20 @@ BuildRequires : gobject-introspection-dev
 BuildRequires : gtk3-dev
 BuildRequires : libpng-dev
 BuildRequires : pango-dev
+BuildRequires : pkgconfig(cairo)
+BuildRequires : pkgconfig(cairo-gobject)
+BuildRequires : pkgconfig(cairo-png)
+BuildRequires : pkgconfig(freetype2)
+BuildRequires : pkgconfig(gdk-pixbuf-2.0)
+BuildRequires : pkgconfig(gio-2.0)
+BuildRequires : pkgconfig(glib-2.0)
+BuildRequires : pkgconfig(gmodule-2.0)
+BuildRequires : pkgconfig(gthread-2.0)
 BuildRequires : pkgconfig(harfbuzz)
 BuildRequires : pkgconfig(libcroco-0.6)
 BuildRequires : pkgconfig(libxml-2.0)
+BuildRequires : pkgconfig(pangocairo)
+BuildRequires : pkgconfig(pangoft2)
 BuildRequires : pypi-docutils
 BuildRequires : rustc
 BuildRequires : zlib-dev
@@ -111,34 +122,34 @@ man components for the librsvg package.
 
 
 %prep
-%setup -q -n librsvg-2.56.0
+%setup -q -n librsvg-2.56.1
 cd %{_builddir}
-tar xf %{_sourcedir}/librsvg-2023-03-24-21-48-23.tar.xz
-cd %{_builddir}/librsvg-2.56.0
+tar xf %{_sourcedir}/librsvg-2023-06-01-22-08-11.tar.xz
+cd %{_builddir}/librsvg-2.56.1
 mkdir -p ./vendor
-cp -r %{_builddir}/librsvg-2023-03-24-21-48-23/* %{_builddir}/librsvg-2.56.0/./vendor
+cp -r %{_builddir}/librsvg-2023-06-01-22-08-11/* %{_builddir}/librsvg-2.56.1/./vendor
+mkdir -p .cargo
+echo '[source.crates-io]' >> .cargo/config.toml
+echo 'replace-with = "vendored-sources"' >> .cargo/config.toml
+echo '[source.vendored-sources]' >> .cargo/config.toml
+echo 'directory = "vendor"' >> .cargo/config.toml
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1679936210
+export SOURCE_DATE_EPOCH=1685657690
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
-export FCFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
-export FFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
-export CXXFLAGS="$CXXFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz "
+export CFLAGS="$CFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz=zstd "
+export FCFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz=zstd "
+export FFLAGS="$FFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz=zstd "
+export CXXFLAGS="$CXXFLAGS -O3 -fdebug-types-section -femit-struct-debug-baseonly -ffat-lto-objects -flto=auto -g1 -gno-column-info -gno-variable-location-views -gz=zstd "
 %configure --disable-static --enable-introspection \
 --enable-vala
-mkdir -p .cargo
-echo '[source.crates-io]' >> .cargo/config.toml
-echo 'replace-with = "vendored-sources"' >> .cargo/config.toml
-echo '[source.vendored-sources]' >> .cargo/config.toml
-echo 'directory = "vendor"' >> .cargo/config.toml
 make  %{?_smp_mflags}
 
 %check
@@ -149,509 +160,536 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1679936210
+export SOURCE_DATE_EPOCH=1685657690
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/librsvg
 cp %{_builddir}/librsvg-%{version}/COPYING.LIB %{buildroot}/usr/share/package-licenses/librsvg/01a6b4bf79aca9b556822601186afab86e8c4fbf || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/adler/LICENSE-0BSD %{buildroot}/usr/share/package-licenses/librsvg/3aedaafe8ea8fce424d1df3be32d1b8816944e0e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/adler/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1d47c63586fe3be7f228cff1ab0c029b53741875 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/adler/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/aho-corasick/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/aho-corasick/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/aho-corasick/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/android_system_properties/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a8ab3e6caa5e7af0ec9235d5db800ace830c0a38 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/android_system_properties/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ac0bf7546a377351144d930c5e31eff058fe4e8f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/anstyle/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/anstyle/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f911b0506e6ba6a56b4edac717b461799f380ef0 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/anyhow/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/anyhow/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/approx/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/47b573e3824cd5e02a1a3ae99e2735b49e0256e4 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/assert_cmd/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/assert_cmd/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2e1d451904c8e984d75366568c4e487f5cb48464 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/atty/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/3acad00f27f89710cd66d3f5528aed5046ac28d9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/autocfg/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/autocfg/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e6d32072ef5f584a805b429ecbd4eec428316dde || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/base-x/LICENSE.md %{buildroot}/usr/share/package-licenses/librsvg/931f154a50d2d24042a4d027aff60996a52fc36f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bit-set/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bit-set/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bit-vec/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bit-vec/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bitflags/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bitflags/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bstr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bstr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/99b5dc64e06bf0354ef3baac0ea25c929e4e3a9a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bstr/src/unicode/data/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/c4f8de16c29dc84a94d610b716fb1c9c7f143582 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bumpalo/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bumpalo/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/0a1e89ac22450cb0311baa2613bc21b7131b321f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bytemuck/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1c619b057a9bf7a8234b3105fcfb5b375e749db1 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bytemuck/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/53e358de8d76c2bf7b8a7f899199592f2eb3fe77 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/bytemuck/LICENSE-ZLIB %{buildroot}/usr/share/package-licenses/librsvg/59b5efd50c4508e7fa74828e7469187bbe5bd864 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/byteorder/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/byteorder/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/byteorder/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cairo-rs/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cairo-rs/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cairo-sys-rs/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cast/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cast/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e5c5af8ddef19fbd109a06b28365d6ab491c5a38 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cfg-expr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cfg-expr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/0dce8bdb8d707f18cd507fddb418b397a84f886a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cfg-if/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cfg-if/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/chrono/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/c145b1a607ecf06aed81f1d04a65c2e43dffdc63 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/ciborium/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap-3.2.23/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap-3.2.23/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_complete/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_complete/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_derive/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_derive/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_lex-0.2.4/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_lex-0.2.4/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_lex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/clap_lex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/const-cstr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/aca374a3362a76702c50bd4e7d590a57f8834fc7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/const-cstr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8838cf14748354bdd25b37507bbb8940248ea5c0 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/const_fn/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/const_fn/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/core-foundation-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/core-foundation-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crc32fast/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crc32fast/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8f178d4cc55689ebdd562cabb1282e33bf8f32fe || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/criterion-plot/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/criterion-plot/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/b18f451b891c20c5648f7a3034908508f49f015b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/criterion/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/criterion/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/b18f451b891c20c5648f7a3034908508f49f015b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-channel/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-channel/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-deque/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-deque/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-epoch/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-epoch/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-utils/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/crossbeam-utils/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cssparser-macros/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/9744cedce099f727b327cd9913a1fdc58a7f5599 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cssparser/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/9744cedce099f727b327cd9913a1fdc58a7f5599 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxx-build/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxx-build/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxx/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxx/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxxbridge-flags/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxxbridge-flags/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxxbridge-macro/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/cxxbridge-macro/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/data-url/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/data-url/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/derive_more/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/c1e917ff061859e1db80a17a26071569d0e9ee4c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/discard/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/8a6aacba0e9181b059d02486d01290589de390b2 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/dlib/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/2647eaa55ecf4acc594af8d0f6dd1a081644ccb6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/doc-comment/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/e8d664ba1298bde0a80494159e28f62666b78824 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/dtoa-short/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d22157abc0fc0b4ae96380c09528e23cf77290a9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/dtoa/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/dtoa/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/either/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/either/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/encoding/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/ea6b3b8dafcd9331dd88deb15dc9d4fb91ddd386 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/errno-dragonfly/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/73724f22eb580e208c5af2e3d089be349209e847 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/errno/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/errno/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7a842f34e127456338641b14c7a00ec246d89fb6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/fastrand/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/fastrand/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/flate2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/flate2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/float-cmp/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/82c40cb8ef2b20a67619649a63762bebfe711480 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/fnv/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/fnv/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/50121d8b8c9f6483fe17ea679f28f85fe59b2a5a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/form_urlencoded/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/form_urlencoded/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/738188f5fed28a950b0fede659706238ec35f8bb || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futf/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futf/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6fc7897021205e271da51720736b06f9b5df3538 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-channel/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-channel/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-executor/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-executor/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-io/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-io/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-macro/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-macro/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-task/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-task/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-util/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/futures-util/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gdk-pixbuf-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gdk-pixbuf/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gdk-pixbuf/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/getrandom-0.1.16/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/getrandom-0.1.16/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/getrandom/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/getrandom/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gio-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gio/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gio/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/glib-macros/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/glib-macros/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/glib-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/glib/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/glib/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/gobject-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/half/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/b37ac973bb994b8f572a333b2617bddabca57d7d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/half/LICENSES/Apache-2.0.txt %{buildroot}/usr/share/package-licenses/librsvg/be561fe6eb626c2566b9a6c0885554b4ee4e6b74 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/half/LICENSES/MIT.txt %{buildroot}/usr/share/package-licenses/librsvg/adadb67a9875aeeac285309f1eab6e47d9ee08a7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hashbrown/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hashbrown/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c9c1c33aee599ebfdfb0bc2aed9ea082d9e3173a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/heck/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/heck/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi-0.1.19/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi-0.1.19/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi-0.2.6/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi-0.2.6/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/hermit-abi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/iana-time-zone-haiku/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/ff44b187892fcf1cd15a3ca61b498041b28afecc || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/iana-time-zone-haiku/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d3f4001d9de83a122956c9195d73e2507bf6c533 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/iana-time-zone/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/ff44b187892fcf1cd15a3ca61b498041b28afecc || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/iana-time-zone/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d3f4001d9de83a122956c9195d73e2507bf6c533 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/idna/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/idna/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/indexmap/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/indexmap/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7e5936a6fa3cf3518c01cec41345adf27399fe12 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/instant/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/037192733999bccd7ed8d75123b7ec09feb4a12d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/io-lifetimes/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/io-lifetimes/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/io-lifetimes/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/is-terminal/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/is-terminal/LICENSE-MIT-atty %{buildroot}/usr/share/package-licenses/librsvg/ffe3aa1f76c00b737c79c3a17b9e30163a936bc0 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/itertools/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/itertools/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/itoa/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/itoa/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/js-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/js-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/language-tags/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f3664de17b3a5309003c1c75a9330b6b7b5866da || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/lazy_static/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/lazy_static/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/libc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/libc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/36d69bcb88153a640740000efe933b009420ce7e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/libloading/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/4ad37fc99fecc5cda018043361f5b12e350e4052 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/libm/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/libm/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/744183c4ca46703f4b738aca20e238e11c9a3b12 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/link-cplusplus/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/link-cplusplus/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/linked-hash-map/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/linked-hash-map/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/linux-raw-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/linux-raw-sys/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/linux-raw-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/locale_config/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/2e040ff5e44fbd2796ade7bce886a226ea10f651 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/lock_api/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/lock_api/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/log/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/aca374a3362a76702c50bd4e7d590a57f8834fc7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/log/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f9cc84dfc567fdc0979fddc3e6257191d8ebc9d8 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/lopdf/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/056eedb8d20c931cea83feca459573af97369919 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/markup5ever/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/markup5ever/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7f358d75b6f5bd544ce84621510900e11b27d3ba || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/matches/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/1b0e913d41a66c988376898aa995d6c2f45bb50c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/matrixmultiply/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/matrixmultiply/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3acde0578c32e432e7c72e1fd5f1a92553647873 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/memchr/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/memchr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/memchr/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/memoffset/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/02bf11a87b9bbacedf2fcf4856af3b933faef82e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/miniz_oxide/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/18d7fe3c54698817feec1f2e04a9d5a0f046a80c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/miniz_oxide/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/miniz_oxide/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/18d7fe3c54698817feec1f2e04a9d5a0f046a80c || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/miniz_oxide/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/11f0f1bee61ba6393c3dc7aefee7b92b604ff6c0 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/nalgebra/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/67aea3947c3de4337d6e0d156bb662989bac8fd3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/new_debug_unreachable/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/108bb98fdf8f27765ea240d80481be8362175ca7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/nodrop/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/nodrop/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/39c13e52bbc0cee5549d36f3829693726fb50a8b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/normalize-line-endings/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-complex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-complex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-integer/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-integer/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-rational/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-rational/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-traits/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num-traits/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num_cpus/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/num_cpus/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ec9737a4e769cce48d5c95d9c75a4ba5f29a2563 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/objc/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/b6701831988d077f53d90abce09a2887fc7b5ea9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/once_cell/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/once_cell/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/oorandom/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/83f84f78511c0e3dc95622f9a0b6e151a9ae4ea5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/os_str_bytes/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/os_str_bytes/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/dace34da2cc966a228ddef52cbc28943931af544 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pango-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pango/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pango/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pangocairo-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pangocairo/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pangocairo/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/parking_lot/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/parking_lot/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/parking_lot_core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/parking_lot_core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/paste/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/paste/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/percent-encoding/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/percent-encoding/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pin-project-lite/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pin-project-lite/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pin-utils/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a2f60339450a52e61c6c1e27dc44bd1e671ad28e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pin-utils/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/91abce61ea0c1c313bb5ba31f04196490960a479 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pkg-config/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pkg-config/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/png/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/png/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f218d448a9934e1982ea7e03a0b4feab2db3bb54 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/pom/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/056eedb8d20c931cea83feca459573af97369919 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/ppv-lite86/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/088830dcb78eba1a2052df69bd5cba5445e8f2d7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/ppv-lite86/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e1c86f32641f01a5b85d6e9b20138e8470b883fc || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/precomputed-hash/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/afcd08e00b65f2380ab5b0aa0217e8d62aa3cb2a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-2.1.5/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-2.1.5/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-tree/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates-tree/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/predicates/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/238f182337462ea1aaa4eafd63f969e8ca45c0e9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-crate/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1d47c63586fe3be7f228cff1ab0c029b53741875 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-crate/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-error-attr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a88eaffea57a51eedb5291e0d55a959df7659458 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-error-attr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/655a437377cc2780990746fe2492fa16764df083 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-error/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/197cb40dc96ded1e036d13ef67fdc7a758ca1388 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-error/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/655a437377cc2780990746fe2492fa16764df083 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-hack/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro-hack/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/594599b254cfdf4e8e7a570660d3f7861362acaf || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proc-macro2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proptest/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/proptest/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8dc371a451b9630ad353a5801255d8ca5a01d722 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quick-error-1.2.3/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quick-error-1.2.3/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/1a00693a4e6240a4d040d1a1f76efaf50f20b8dd || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quick-error/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quick-error/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/1a00693a4e6240a4d040d1a1f76efaf50f20b8dd || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quote/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/quote/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand-0.7.3/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand-0.7.3/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand-0.7.3/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/4632a631b427f005d97734ea8c6a44090fec5cd9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha-0.2.2/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha-0.2.2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha-0.2.2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_chacha/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_core-0.5.1/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_core-0.5.1/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_core-0.5.1/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_core/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_hc/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_hc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_hc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2e87f5a7544123079270e8178a5ab0bbd19d0e51 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_pcg/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_pcg/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_pcg/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ac1dc5ec3778e81d0e4041cc84de9f32fd81c663 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_xorshift/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_xorshift/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rand_xorshift/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rawpointer/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rawpointer/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rayon-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rayon-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rayon/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rayon/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rctree/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/3eed127d8ad99ff441893310d5204b0d59642182 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/redox_syscall/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/a00165152c82ea55b9fc254890dc8860c25e3bb6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-automata/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-automata/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-automata/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-automata/data/fowler-tests/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-automata/data/tests/fowler/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-syntax/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-syntax/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex-syntax/src/unicode_tables/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/68d12a03b339648117165b9c021b93f26974d6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/regex/src/testdata/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rgb/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/48acb35590994811b0ba1c96de13cd6918e8b772 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustc_version-0.2.3/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustc_version-0.2.3/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustc_version/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustc_version/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustix/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustix/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rustix/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rusty-fork/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/rusty-fork/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8dc371a451b9630ad353a5801255d8ca5a01d722 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/ryu/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/ryu/LICENSE-BOOST %{buildroot}/usr/share/package-licenses/librsvg/3cba29011be2b9d59f6204d6fa0a386b1b2dbd90 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/safe_arch/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/34b5f5f96fc9e2d7afcb92a9e05b6945b759e291 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/same-file/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/same-file/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2ad1215c12bd0a3492399dc438aa63084323c662 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/same-file/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/scopeguard/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/scopeguard/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f498d95a48889a0b1432e420e6754881eff1d593 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/scratch/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/scratch/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver-0.9.0/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver-0.9.0/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver-parser/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver-parser/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/da31fe66a3349c85f4ca594c232d82ac4f02a76b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/semver/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde_derive/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde_derive/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde_json/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/serde_json/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/servo_arc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/servo_arc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/sha1/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f9654b00d54b884770b29eb4de95426b899a4851 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/sha1_smol/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f9654b00d54b884770b29eb4de95426b899a4851 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/simba/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/fb0faef476593ab6845b621a3b6822ad6519755e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/siphasher/COPYING %{buildroot}/usr/share/package-licenses/librsvg/89dd598543231b6010a8d57e5cd4f31331fe5364 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/slab/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/96f019e8abadc7a87b330a697504d874a1c06268 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/smallvec/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/smallvec/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c61640f6c218caf86d1b8072e09668a8362dba04 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/stable_deref_trait/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/stable_deref_trait/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f81793ddf50f460d6111fcbc799cab1a804aa000 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/standback/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/d7922ed0153e53eb7d63ea3fcae1040472c67679 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/standback/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5cf642681dd90eff72f7ce96cf89c9c0aa29a232 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/stdweb/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/8c928763604ebcacf3a02fe3a9e7f799eb3beb8f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/stdweb/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f995afb5bda993c8e685b91d84a30fac42ec16e4 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/string_cache/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/string_cache/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/string_cache_codegen/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/string_cache_codegen/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/strsim/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f5feee4154156527645a9b18ef29da23fc859ca9 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/syn/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/syn/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/system-deps/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/system-deps/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tempfile/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tempfile/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/70693ba8757c4a17af68e39ab32e4e0d4a389416 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tendril/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tendril/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6fc7897021205e271da51720736b06f9b5df3538 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/termcolor/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/termcolor/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/termcolor/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/termtree/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/19b4f6d5815ac866d69353dd925e66db58a24a77 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/textwrap/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/70e36c2f54755e87728778c41ab4b809e5b0b502 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/thiserror-impl/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/thiserror-impl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/thiserror/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/thiserror/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time-macros-impl/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time-macros-impl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time-macros/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time-macros/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/time/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinytemplate/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinytemplate/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5875ddc227c505ff2ad6e06538e1d72d403b9060 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinyvec/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/47b573e3824cd5e02a1a3ae99e2735b49e0256e4 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinyvec/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/ee70bf5efb387a6c52c0f5cbea4122c6a74a57bb || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinyvec/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/59b5efd50c4508e7fa74828e7469187bbe5bd864 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinyvec_macros/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/8cc042e8e4b82c5532c72172a1988a74a599d4b5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/tinyvec_macros/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/86d193cb6b24df990cbbaf67c6a24fddbcb574c1 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml_datetime/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml_datetime/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml_edit/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/toml_edit/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5c49326657f4bfcc54ecb92f1dbde442e7132a08 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/typenum/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/481e4be7d70c11ee3f6e04a59a0e5afccc551db2 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/typenum/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/69facfd64b2a7aa4a22c917ef10cd96e41b75b87 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/typenum/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5984f5244c7bc13bf15a5bea823c04ec0bbc714f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unarray/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unarray/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2c87153926f8a458cffc9a435e15571ba721c2fa || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-bidi/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/871b9912ab96cf7d79cb8ae83ca0b08cd5d0cbfd || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-bidi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-bidi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-ident/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-ident/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-ident/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/583a5eebcf6119730bd96922e8a0faecf7faf720 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-normalization/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/5ed53061419caf64f84d064f3641392a2a10fa7f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-normalization/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-normalization/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-width/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/5ed53061419caf64f84d064f3641392a2a10fa7f || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-width/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/unicode-width/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/url/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/url/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/utf-8/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/utf-8/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/version-compare/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/bbca91a10afe6e9d066acdd53930d0c47eb08803 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/version_check/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/version_check/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/cfcb552ef0afbe7ccb4128891c0de00685988a4b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wait-timeout/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wait-timeout/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/walkdir/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/walkdir/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/walkdir/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-backend/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-backend/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-macro-support/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-macro-support/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-macro/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-macro/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-shared/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen-shared/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wasm-bindgen/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/web-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/web-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/weezl/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/b95542c0be3bd915a1e7d8df80711fce5cd0795b || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/weezl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8c471d96c3f353b150381b5de420d76aa5b37fb6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/wide/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/34b5f5f96fc9e2d7afcb92a9e05b6945b759e291 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winapi-util/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winapi-util/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2ad1215c12bd0a3492399dc438aa63084323c662 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winapi-util/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winapi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winapi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2243f7a86daaa727d34d92e987a741036f288464 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-sys-0.42.0/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-sys-0.42.0/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-sys/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-sys/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-targets/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows-targets/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_aarch64_gnullvm/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_aarch64_gnullvm/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_aarch64_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_aarch64_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_i686_gnu/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_i686_gnu/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_i686_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_i686_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_gnu/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_gnu/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_gnullvm/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_gnullvm/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/windows_x86_64_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/winnow/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c0955b5351b1dcafdd0b9bb2d7e84fe0e3d731ca || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/xml5ever/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/xml5ever/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7f358d75b6f5bd544ce84621510900e11b27d3ba || :
-cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/e9329a17e1d42e0a76bbb8d9c48f5812b19e9dee || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/adler/LICENSE-0BSD %{buildroot}/usr/share/package-licenses/librsvg/3aedaafe8ea8fce424d1df3be32d1b8816944e0e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/adler/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1d47c63586fe3be7f228cff1ab0c029b53741875 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/adler/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/aho-corasick/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/aho-corasick/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/aho-corasick/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/android-tzdata/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2c87153926f8a458cffc9a435e15571ba721c2fa || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/android_system_properties/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a8ab3e6caa5e7af0ec9235d5db800ace830c0a38 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/android_system_properties/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ac0bf7546a377351144d930c5e31eff058fe4e8f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstream/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstream/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-parse/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-parse/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/64a8c11fd0f3068e743bfc681bcbef4f50a6b779 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-query/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-query/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-wincon/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle-wincon/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/33dbd2d99ad231460bbb01812a52c85e577bd9ba || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anstyle/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f911b0506e6ba6a56b4edac717b461799f380ef0 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anyhow/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/anyhow/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/approx/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/47b573e3824cd5e02a1a3ae99e2735b49e0256e4 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/assert_cmd/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/assert_cmd/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/atty/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/3acad00f27f89710cd66d3f5528aed5046ac28d9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/autocfg/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/autocfg/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e6d32072ef5f584a805b429ecbd4eec428316dde || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/base-x/LICENSE.md %{buildroot}/usr/share/package-licenses/librsvg/931f154a50d2d24042a4d027aff60996a52fc36f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bit-set/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bit-set/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bit-vec/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bit-vec/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bitflags/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bitflags/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bstr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bstr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/99b5dc64e06bf0354ef3baac0ea25c929e4e3a9a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bstr/src/unicode/data/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/c4f8de16c29dc84a94d610b716fb1c9c7f143582 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bumpalo/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bumpalo/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/0a1e89ac22450cb0311baa2613bc21b7131b321f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bytemuck/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1c619b057a9bf7a8234b3105fcfb5b375e749db1 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bytemuck/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/53e358de8d76c2bf7b8a7f899199592f2eb3fe77 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/bytemuck/LICENSE-ZLIB %{buildroot}/usr/share/package-licenses/librsvg/59b5efd50c4508e7fa74828e7469187bbe5bd864 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/byteorder/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/byteorder/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/byteorder/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cairo-rs/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cairo-rs/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cairo-sys-rs/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cast/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cast/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e5c5af8ddef19fbd109a06b28365d6ab491c5a38 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cfg-expr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cfg-expr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/0dce8bdb8d707f18cd507fddb418b397a84f886a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cfg-if/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cfg-if/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/chrono/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/c145b1a607ecf06aed81f1d04a65c2e43dffdc63 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ciborium-io/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ciborium-ll/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ciborium/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap-3.2.25/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap-3.2.25/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_builder/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_builder/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_complete/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_complete/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_derive/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_derive/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_lex-0.2.4/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_lex-0.2.4/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_lex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/clap_lex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/colorchoice/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/colorchoice/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/const-cstr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/aca374a3362a76702c50bd4e7d590a57f8834fc7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/const-cstr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8838cf14748354bdd25b37507bbb8940248ea5c0 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/const_fn/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/const_fn/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/core-foundation-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/core-foundation-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crc32fast/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crc32fast/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8f178d4cc55689ebdd562cabb1282e33bf8f32fe || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/criterion-plot/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/criterion-plot/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/b18f451b891c20c5648f7a3034908508f49f015b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/criterion/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/criterion/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/b18f451b891c20c5648f7a3034908508f49f015b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-channel/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-channel/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-deque/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-deque/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-epoch/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-epoch/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-utils/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/crossbeam-utils/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/144111aa0f14ef5a181326683aa9ebbd9252bca6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cssparser-macros/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/9744cedce099f727b327cd9913a1fdc58a7f5599 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/cssparser/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/9744cedce099f727b327cd9913a1fdc58a7f5599 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/data-url/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/data-url/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/derive_more/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/c1e917ff061859e1db80a17a26071569d0e9ee4c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/discard/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/8a6aacba0e9181b059d02486d01290589de390b2 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/dlib/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/2647eaa55ecf4acc594af8d0f6dd1a081644ccb6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/doc-comment/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/e8d664ba1298bde0a80494159e28f62666b78824 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/dtoa-short/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d22157abc0fc0b4ae96380c09528e23cf77290a9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/dtoa/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/dtoa/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/either/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/either/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/encoding/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/ea6b3b8dafcd9331dd88deb15dc9d4fb91ddd386 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/encoding_rs/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/2b8b815229aa8a61e483fb4ba0588b8b6c491890 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/encoding_rs/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/b4872d72eb3ccfa74730cc229184eec04f303e7d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/encoding_rs/LICENSE-WHATWG %{buildroot}/usr/share/package-licenses/librsvg/1e35cd39af07e5460de3011d5ef8f6a775ee54ae || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/errno-dragonfly/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/73724f22eb580e208c5af2e3d089be349209e847 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/errno/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/errno/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7a842f34e127456338641b14c7a00ec246d89fb6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/fastrand/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/fastrand/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/flate2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/flate2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/float-cmp/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/82c40cb8ef2b20a67619649a63762bebfe711480 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/fnv/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/fnv/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/50121d8b8c9f6483fe17ea679f28f85fe59b2a5a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/form_urlencoded/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/form_urlencoded/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/738188f5fed28a950b0fede659706238ec35f8bb || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futf/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futf/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6fc7897021205e271da51720736b06f9b5df3538 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-channel/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-channel/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-executor/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-executor/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-io/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-io/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-macro/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-macro/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-task/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-task/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-util/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e81567c196622efa36b46c5fd53cde741aaf0993 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/futures-util/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/067f31555f328efb78075174add7db97d98618c6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gdk-pixbuf-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gdk-pixbuf/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gdk-pixbuf/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/getrandom-0.1.16/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/getrandom-0.1.16/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/getrandom/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/getrandom/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gio-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gio/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gio/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/glib-macros/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/glib-macros/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/glib-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/glib/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/glib/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/gobject-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/half/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/b37ac973bb994b8f572a333b2617bddabca57d7d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/half/LICENSES/Apache-2.0.txt %{buildroot}/usr/share/package-licenses/librsvg/be561fe6eb626c2566b9a6c0885554b4ee4e6b74 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/half/LICENSES/MIT.txt %{buildroot}/usr/share/package-licenses/librsvg/adadb67a9875aeeac285309f1eab6e47d9ee08a7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hashbrown/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hashbrown/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c9c1c33aee599ebfdfb0bc2aed9ea082d9e3173a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/heck/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/heck/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi-0.1.19/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi-0.1.19/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi-0.2.6/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi-0.2.6/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/hermit-abi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/iana-time-zone-haiku/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/ff44b187892fcf1cd15a3ca61b498041b28afecc || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/iana-time-zone-haiku/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d3f4001d9de83a122956c9195d73e2507bf6c533 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/iana-time-zone/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/ff44b187892fcf1cd15a3ca61b498041b28afecc || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/iana-time-zone/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d3f4001d9de83a122956c9195d73e2507bf6c533 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/idna/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/idna/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/indexmap/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/indexmap/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7e5936a6fa3cf3518c01cec41345adf27399fe12 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/instant/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/037192733999bccd7ed8d75123b7ec09feb4a12d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/io-lifetimes/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/io-lifetimes/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/io-lifetimes/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/is-terminal/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/is-terminal/LICENSE-MIT-atty %{buildroot}/usr/share/package-licenses/librsvg/ffe3aa1f76c00b737c79c3a17b9e30163a936bc0 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/itertools/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/itertools/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/itoa/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/itoa/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/js-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/js-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/language-tags/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f3664de17b3a5309003c1c75a9330b6b7b5866da || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/lazy_static/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/lazy_static/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/libc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/libc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/36d69bcb88153a640740000efe933b009420ce7e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/libloading/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/4ad37fc99fecc5cda018043361f5b12e350e4052 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/libm/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/libm/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/744183c4ca46703f4b738aca20e238e11c9a3b12 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/linked-hash-map/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/linked-hash-map/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/linux-raw-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/linux-raw-sys/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/linux-raw-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/locale_config/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/2e040ff5e44fbd2796ade7bce886a226ea10f651 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/lock_api/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/lock_api/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/log/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/log/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/lopdf/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/056eedb8d20c931cea83feca459573af97369919 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/markup5ever/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/markup5ever/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7f358d75b6f5bd544ce84621510900e11b27d3ba || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/matches/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/1b0e913d41a66c988376898aa995d6c2f45bb50c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/matrixmultiply/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/memchr/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/memchr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/memchr/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/memoffset/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/02bf11a87b9bbacedf2fcf4856af3b933faef82e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/miniz_oxide/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/18d7fe3c54698817feec1f2e04a9d5a0f046a80c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/miniz_oxide/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/miniz_oxide/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/18d7fe3c54698817feec1f2e04a9d5a0f046a80c || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/miniz_oxide/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/11f0f1bee61ba6393c3dc7aefee7b92b604ff6c0 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/nalgebra/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/67aea3947c3de4337d6e0d156bb662989bac8fd3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/new_debug_unreachable/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/108bb98fdf8f27765ea240d80481be8362175ca7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/nodrop/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/nodrop/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/39c13e52bbc0cee5549d36f3829693726fb50a8b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/normalize-line-endings/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-complex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-complex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-integer/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-integer/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-rational/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-rational/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-traits/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num-traits/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num_cpus/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/num_cpus/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ec9737a4e769cce48d5c95d9c75a4ba5f29a2563 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/objc/LICENSE.txt %{buildroot}/usr/share/package-licenses/librsvg/b6701831988d077f53d90abce09a2887fc7b5ea9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/once_cell/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/once_cell/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/oorandom/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/83f84f78511c0e3dc95622f9a0b6e151a9ae4ea5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/os_str_bytes/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/os_str_bytes/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/dace34da2cc966a228ddef52cbc28943931af544 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pango-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pango/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pango/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pangocairo-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pangocairo/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pangocairo/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/d552e9ea99ac411f45bda877729a38461a13248b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/parking_lot/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/parking_lot/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/parking_lot_core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/parking_lot_core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/paste/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/paste/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/percent-encoding/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/percent-encoding/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pin-project-lite/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/598f87f072f66e2269dd6919292b2934dbb20492 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pin-project-lite/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pin-utils/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a2f60339450a52e61c6c1e27dc44bd1e671ad28e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pin-utils/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/91abce61ea0c1c313bb5ba31f04196490960a479 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pkg-config/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pkg-config/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/png/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/png/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f218d448a9934e1982ea7e03a0b4feab2db3bb54 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/pom/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/056eedb8d20c931cea83feca459573af97369919 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ppv-lite86/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/088830dcb78eba1a2052df69bd5cba5445e8f2d7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ppv-lite86/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/e1c86f32641f01a5b85d6e9b20138e8470b883fc || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/precomputed-hash/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/afcd08e00b65f2380ab5b0aa0217e8d62aa3cb2a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-2.1.5/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-2.1.5/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-tree/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates-tree/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/predicates/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/238f182337462ea1aaa4eafd63f969e8ca45c0e9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-crate/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/1d47c63586fe3be7f228cff1ab0c029b53741875 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-crate/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-error-attr/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/a88eaffea57a51eedb5291e0d55a959df7659458 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-error-attr/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/655a437377cc2780990746fe2492fa16764df083 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-error/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/197cb40dc96ded1e036d13ef67fdc7a758ca1388 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-error/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/655a437377cc2780990746fe2492fa16764df083 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-hack/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro-hack/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/594599b254cfdf4e8e7a570660d3f7861362acaf || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proc-macro2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proptest/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/proptest/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8dc371a451b9630ad353a5801255d8ca5a01d722 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/quick-error/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/quick-error/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/1a00693a4e6240a4d040d1a1f76efaf50f20b8dd || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/quote/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/quote/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand-0.7.3/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand-0.7.3/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand-0.7.3/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/4632a631b427f005d97734ea8c6a44090fec5cd9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha-0.2.2/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha-0.2.2/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha-0.2.2/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_chacha/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_core-0.5.1/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_core-0.5.1/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_core-0.5.1/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_core/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_hc/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_hc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_hc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2e87f5a7544123079270e8178a5ab0bbd19d0e51 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_pcg/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_pcg/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_pcg/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ac1dc5ec3778e81d0e4041cc84de9f32fd81c663 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_xorshift/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/f14afa20edce530124d39cd56312c7781c19b267 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_xorshift/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/e9b475b5dccf14bd66d72dd12a04db75eaad1a9e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rand_xorshift/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/d74ad13f1402c35008f22bc588a6b8199ed164d3 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rawpointer/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rawpointer/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rayon-core/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rayon-core/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rayon/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rayon/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rctree/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/3eed127d8ad99ff441893310d5204b0d59642182 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/redox_syscall-0.2.16/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/a00165152c82ea55b9fc254890dc8860c25e3bb6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/redox_syscall/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/a00165152c82ea55b9fc254890dc8860c25e3bb6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-automata/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-automata/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-automata/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-automata/data/fowler-tests/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-automata/data/tests/fowler/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax-0.6.29/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax-0.6.29/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax-0.6.29/src/unicode_tables/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/68d12a03b339648117165b9c021b93f26974d6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex-syntax/src/unicode_tables/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/68d12a03b339648117165b9c021b93f26974d6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/regex/src/testdata/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rgb/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/48acb35590994811b0ba1c96de13cd6918e8b772 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustc_version-0.2.3/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustc_version-0.2.3/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustc_version/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustc_version/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9a2b6b4ad55ec42cf19fc686c74668d3a6303ae7 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustix/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustix/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rustix/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rusty-fork/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/rusty-fork/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8dc371a451b9630ad353a5801255d8ca5a01d722 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ryu/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/ryu/LICENSE-BOOST %{buildroot}/usr/share/package-licenses/librsvg/3cba29011be2b9d59f6204d6fa0a386b1b2dbd90 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/safe_arch/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/34b5f5f96fc9e2d7afcb92a9e05b6945b759e291 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/same-file/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/same-file/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2ad1215c12bd0a3492399dc438aa63084323c662 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/same-file/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/scopeguard/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/scopeguard/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f498d95a48889a0b1432e420e6754881eff1d593 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver-0.9.0/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver-0.9.0/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/9f3c36d2b7d381d9cf382a00166f3fbd06783636 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver-parser/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver-parser/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/da31fe66a3349c85f4ca594c232d82ac4f02a76b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/semver/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_derive/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_derive/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_json/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_json/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_spanned/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/serde_spanned/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/servo_arc/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/servo_arc/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/sha1/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f9654b00d54b884770b29eb4de95426b899a4851 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/sha1_smol/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f9654b00d54b884770b29eb4de95426b899a4851 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/simba/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/fb0faef476593ab6845b621a3b6822ad6519755e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/simd-adler32/LICENSE.md %{buildroot}/usr/share/package-licenses/librsvg/469d0508b20c9bc1928d015639741deaf5c2a0ed || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/siphasher/COPYING %{buildroot}/usr/share/package-licenses/librsvg/89dd598543231b6010a8d57e5cd4f31331fe5364 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/slab/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/96f019e8abadc7a87b330a697504d874a1c06268 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/smallvec/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/smallvec/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c61640f6c218caf86d1b8072e09668a8362dba04 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/stable_deref_trait/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/stable_deref_trait/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f81793ddf50f460d6111fcbc799cab1a804aa000 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/standback/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/d7922ed0153e53eb7d63ea3fcae1040472c67679 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/standback/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5cf642681dd90eff72f7ce96cf89c9c0aa29a232 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/stdweb/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/8c928763604ebcacf3a02fe3a9e7f799eb3beb8f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/stdweb/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/f995afb5bda993c8e685b91d84a30fac42ec16e4 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/string_cache/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/string_cache/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/string_cache_codegen/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/string_cache_codegen/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6c2945f449081ab19640fb7c70a081a1a4559399 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/strsim/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f5feee4154156527645a9b18ef29da23fc859ca9 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/syn-1.0.109/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/syn-1.0.109/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/syn/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/syn/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/system-deps/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/system-deps/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/target-lexicon/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tempfile/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tempfile/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/70693ba8757c4a17af68e39ab32e4e0d4a389416 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tendril/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tendril/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/6fc7897021205e271da51720736b06f9b5df3538 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/termtree/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/19b4f6d5815ac866d69353dd925e66db58a24a77 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/textwrap/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/70e36c2f54755e87728778c41ab4b809e5b0b502 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/thiserror-impl/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/thiserror-impl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/thiserror/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/thiserror/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time-macros-impl/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time-macros-impl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time-macros/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time-macros/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time/LICENSE-Apache %{buildroot}/usr/share/package-licenses/librsvg/edcd96f3b273b3ea001b857ab84423717f47219f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/time/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/81de369a18ebc17fa463ad6bdd2d359cb0fb8936 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinytemplate/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinytemplate/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5875ddc227c505ff2ad6e06538e1d72d403b9060 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinyvec/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/47b573e3824cd5e02a1a3ae99e2735b49e0256e4 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinyvec/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/ee70bf5efb387a6c52c0f5cbea4122c6a74a57bb || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinyvec/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/59b5efd50c4508e7fa74828e7469187bbe5bd864 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinyvec_macros/LICENSE-APACHE.md %{buildroot}/usr/share/package-licenses/librsvg/8cc042e8e4b82c5532c72172a1988a74a599d4b5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/tinyvec_macros/LICENSE-MIT.md %{buildroot}/usr/share/package-licenses/librsvg/86d193cb6b24df990cbbaf67c6a24fddbcb574c1 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml_datetime/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml_datetime/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml_edit/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/toml_edit/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5c49326657f4bfcc54ecb92f1dbde442e7132a08 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/typenum/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/481e4be7d70c11ee3f6e04a59a0e5afccc551db2 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/typenum/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/69facfd64b2a7aa4a22c917ef10cd96e41b75b87 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/typenum/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/5984f5244c7bc13bf15a5bea823c04ec0bbc714f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unarray/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/7df059597099bb7dcf25d2a9aedfaf4465f72d8d || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unarray/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2c87153926f8a458cffc9a435e15571ba721c2fa || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-bidi/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/871b9912ab96cf7d79cb8ae83ca0b08cd5d0cbfd || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-bidi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-bidi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-ident/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-ident/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-ident/LICENSE-UNICODE %{buildroot}/usr/share/package-licenses/librsvg/583a5eebcf6119730bd96922e8a0faecf7faf720 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-normalization/COPYRIGHT %{buildroot}/usr/share/package-licenses/librsvg/5ed53061419caf64f84d064f3641392a2a10fa7f || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-normalization/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/unicode-normalization/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/url/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/url/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/a81399b7c3ec2d4619848fd59c11d21211fc3b86 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/utf-8/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/utf-8/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/utf8parse/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/6e5c4711bcae04967d7f5b5e01cf56ae03bebe7a || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/utf8parse/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/93074692b8a28bef1743c44a9e5b97b1401c0d09 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/version-compare/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/bbca91a10afe6e9d066acdd53930d0c47eb08803 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/version_check/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/version_check/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/cfcb552ef0afbe7ccb4128891c0de00685988a4b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wait-timeout/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wait-timeout/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/walkdir/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/walkdir/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/walkdir/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi-0.9.0+wasi-snapshot-preview1/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi/LICENSE-Apache-2.0_WITH_LLVM-exception %{buildroot}/usr/share/package-licenses/librsvg/f137043e018f2024e0414a9153ea728c203ae8e5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/ce3a2603094e799f42ce99c40941544dfcc5c4a5 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-backend/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-backend/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-macro-support/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-macro-support/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-macro/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-macro/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-shared/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen-shared/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wasm-bindgen/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/web-sys/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/web-sys/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/weezl/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/b95542c0be3bd915a1e7d8df80711fce5cd0795b || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/weezl/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/8c471d96c3f353b150381b5de420d76aa5b37fb6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/wide/LICENSE-ZLIB.md %{buildroot}/usr/share/package-licenses/librsvg/34b5f5f96fc9e2d7afcb92a9e05b6945b759e291 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winapi-util/COPYING %{buildroot}/usr/share/package-licenses/librsvg/dd445710e6e4caccc4f8a587a130eaeebe83f6f6 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winapi-util/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2ad1215c12bd0a3492399dc438aa63084323c662 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winapi-util/UNLICENSE %{buildroot}/usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winapi/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winapi/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/2243f7a86daaa727d34d92e987a741036f288464 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-sys-0.45.0/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-sys-0.45.0/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-sys/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-sys/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-targets-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-targets-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-targets/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows-targets/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_gnullvm-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_gnullvm-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_gnullvm/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_gnullvm/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_msvc-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_msvc-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_aarch64_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_gnu-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_gnu-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_gnu/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_gnu/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_msvc-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_msvc-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_i686_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnu-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnu-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnu/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnu/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnullvm-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnullvm-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnullvm/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_gnullvm/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_msvc-0.42.2/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_msvc-0.42.2/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_msvc/license-apache-2.0 %{buildroot}/usr/share/package-licenses/librsvg/a3b3a65335e78bde163f84d599fa899776552994 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/windows_x86_64_msvc/license-mit %{buildroot}/usr/share/package-licenses/librsvg/689ec0681815ecc32bee639c68e7740add7bd301 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/winnow/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/c0955b5351b1dcafdd0b9bb2d7e84fe0e3d731ca || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/xml5ever/LICENSE-APACHE %{buildroot}/usr/share/package-licenses/librsvg/5798832c31663cedc1618d18544d445da0295229 || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/xml5ever/LICENSE-MIT %{buildroot}/usr/share/package-licenses/librsvg/7f358d75b6f5bd544ce84621510900e11b27d3ba || :
+cp %{_builddir}/librsvg-2023-06-01-22-08-11/yeslogic-fontconfig-sys/LICENSE %{buildroot}/usr/share/package-licenses/librsvg/e9329a17e1d42e0a76bbb8d9c48f5812b19e9dee || :
 %make_install
 
 %files
@@ -679,7 +717,7 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 
 %files doc
 %defattr(0644,root,root,0755)
-%doc /usr/share/doc/librsvg/*
+/usr/share/doc/librsvg/*
 
 %files lib
 %defattr(-,root,root,-)
@@ -707,32 +745,35 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 /usr/share/package-licenses/librsvg/1b0e913d41a66c988376898aa995d6c2f45bb50c
 /usr/share/package-licenses/librsvg/1c619b057a9bf7a8234b3105fcfb5b375e749db1
 /usr/share/package-licenses/librsvg/1d47c63586fe3be7f228cff1ab0c029b53741875
+/usr/share/package-licenses/librsvg/1e35cd39af07e5460de3011d5ef8f6a775ee54ae
 /usr/share/package-licenses/librsvg/2243f7a86daaa727d34d92e987a741036f288464
 /usr/share/package-licenses/librsvg/238f182337462ea1aaa4eafd63f969e8ca45c0e9
 /usr/share/package-licenses/librsvg/2647eaa55ecf4acc594af8d0f6dd1a081644ccb6
 /usr/share/package-licenses/librsvg/26cc7e3e048b8c2b640f5b15273cb9c0a8737702
 /usr/share/package-licenses/librsvg/2ad1215c12bd0a3492399dc438aa63084323c662
+/usr/share/package-licenses/librsvg/2b8b815229aa8a61e483fb4ba0588b8b6c491890
 /usr/share/package-licenses/librsvg/2bf5cac862d5a0480b5d5bcd3a1852d68bfeee84
 /usr/share/package-licenses/librsvg/2c87153926f8a458cffc9a435e15571ba721c2fa
 /usr/share/package-licenses/librsvg/2e040ff5e44fbd2796ade7bce886a226ea10f651
-/usr/share/package-licenses/librsvg/2e1d451904c8e984d75366568c4e487f5cb48464
 /usr/share/package-licenses/librsvg/2e87f5a7544123079270e8178a5ab0bbd19d0e51
+/usr/share/package-licenses/librsvg/33dbd2d99ad231460bbb01812a52c85e577bd9ba
 /usr/share/package-licenses/librsvg/34b5f5f96fc9e2d7afcb92a9e05b6945b759e291
 /usr/share/package-licenses/librsvg/36d69bcb88153a640740000efe933b009420ce7e
 /usr/share/package-licenses/librsvg/39c13e52bbc0cee5549d36f3829693726fb50a8b
 /usr/share/package-licenses/librsvg/3a86cfdfa553511b381388859c9e94ce9e1f916b
 /usr/share/package-licenses/librsvg/3acad00f27f89710cd66d3f5528aed5046ac28d9
-/usr/share/package-licenses/librsvg/3acde0578c32e432e7c72e1fd5f1a92553647873
 /usr/share/package-licenses/librsvg/3aedaafe8ea8fce424d1df3be32d1b8816944e0e
 /usr/share/package-licenses/librsvg/3b042d3d971924ec0296687efd50dbe08b734976
 /usr/share/package-licenses/librsvg/3cba29011be2b9d59f6204d6fa0a386b1b2dbd90
 /usr/share/package-licenses/librsvg/3eed127d8ad99ff441893310d5204b0d59642182
 /usr/share/package-licenses/librsvg/4632a631b427f005d97734ea8c6a44090fec5cd9
+/usr/share/package-licenses/librsvg/469d0508b20c9bc1928d015639741deaf5c2a0ed
 /usr/share/package-licenses/librsvg/47b573e3824cd5e02a1a3ae99e2735b49e0256e4
 /usr/share/package-licenses/librsvg/481e4be7d70c11ee3f6e04a59a0e5afccc551db2
 /usr/share/package-licenses/librsvg/48acb35590994811b0ba1c96de13cd6918e8b772
 /usr/share/package-licenses/librsvg/4ad37fc99fecc5cda018043361f5b12e350e4052
 /usr/share/package-licenses/librsvg/4c8990add9180fc59efa5b0d8faf643c9709501e
+/usr/share/package-licenses/librsvg/4dbe8833d0189c691b308c3dd40fab84ef2e9630
 /usr/share/package-licenses/librsvg/50121d8b8c9f6483fe17ea679f28f85fe59b2a5a
 /usr/share/package-licenses/librsvg/53e358de8d76c2bf7b8a7f899199592f2eb3fe77
 /usr/share/package-licenses/librsvg/553e82bef8637312393c95bc62e23e8f81fd9e47
@@ -748,6 +789,7 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 /usr/share/package-licenses/librsvg/5ed53061419caf64f84d064f3641392a2a10fa7f
 /usr/share/package-licenses/librsvg/5feaf15b3fa7d2d226d811e5fcd49098a1ea520c
 /usr/share/package-licenses/librsvg/60c3522081bf15d7ac1d4c5a63de425ef253e87a
+/usr/share/package-licenses/librsvg/64a8c11fd0f3068e743bfc681bcbef4f50a6b779
 /usr/share/package-licenses/librsvg/655a437377cc2780990746fe2492fa16764df083
 /usr/share/package-licenses/librsvg/669a1e53b9dd9df3474300d3d959bb85bad75945
 /usr/share/package-licenses/librsvg/67aea3947c3de4337d6e0d156bb662989bac8fd3
@@ -782,6 +824,7 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 /usr/share/package-licenses/librsvg/8fe88f09d35c6054e0a780a793833c16fb888168
 /usr/share/package-licenses/librsvg/91abce61ea0c1c313bb5ba31f04196490960a479
 /usr/share/package-licenses/librsvg/92170cdc034b2ff819323ff670d3b7266c8bffcd
+/usr/share/package-licenses/librsvg/93074692b8a28bef1743c44a9e5b97b1401c0d09
 /usr/share/package-licenses/librsvg/931f154a50d2d24042a4d027aff60996a52fc36f
 /usr/share/package-licenses/librsvg/954d187b36fac82f7bb46a25b7d21b1fca75be97
 /usr/share/package-licenses/librsvg/96f019e8abadc7a87b330a697504d874a1c06268
@@ -803,6 +846,7 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 /usr/share/package-licenses/librsvg/afcd08e00b65f2380ab5b0aa0217e8d62aa3cb2a
 /usr/share/package-licenses/librsvg/b18f451b891c20c5648f7a3034908508f49f015b
 /usr/share/package-licenses/librsvg/b37ac973bb994b8f572a333b2617bddabca57d7d
+/usr/share/package-licenses/librsvg/b4872d72eb3ccfa74730cc229184eec04f303e7d
 /usr/share/package-licenses/librsvg/b6701831988d077f53d90abce09a2887fc7b5ea9
 /usr/share/package-licenses/librsvg/b95542c0be3bd915a1e7d8df80711fce5cd0795b
 /usr/share/package-licenses/librsvg/bbca91a10afe6e9d066acdd53930d0c47eb08803
@@ -844,7 +888,6 @@ cp %{_builddir}/librsvg-2023-03-24-21-48-23/yeslogic-fontconfig-sys/LICENSE %{bu
 /usr/share/package-licenses/librsvg/f911b0506e6ba6a56b4edac717b461799f380ef0
 /usr/share/package-licenses/librsvg/f9654b00d54b884770b29eb4de95426b899a4851
 /usr/share/package-licenses/librsvg/f995afb5bda993c8e685b91d84a30fac42ec16e4
-/usr/share/package-licenses/librsvg/f9cc84dfc567fdc0979fddc3e6257191d8ebc9d8
 /usr/share/package-licenses/librsvg/fb0faef476593ab6845b621a3b6822ad6519755e
 /usr/share/package-licenses/librsvg/ff007ce11f3ff7964f1a5b04202c4e95b5c82c85
 /usr/share/package-licenses/librsvg/ff44b187892fcf1cd15a3ca61b498041b28afecc
