@@ -4,10 +4,10 @@
 # Using build pattern: configure
 #
 Name     : librsvg
-Version  : 2.56.3
-Release  : 95
-URL      : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.3.tar.xz
-Source0  : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.3.tar.xz
+Version  : 2.56.4
+Release  : 96
+URL      : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.4.tar.xz
+Source0  : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.4.tar.xz
 Source1  : http://localhost/cgit/vendor/librsvg/snapshot/librsvg-2023-07-21-14-51-52.tar.xz
 Summary  : library that renders svg files
 Group    : Development/Tools
@@ -122,12 +122,12 @@ man components for the librsvg package.
 
 
 %prep
-%setup -q -n librsvg-2.56.3
+%setup -q -n librsvg-2.56.4
 cd %{_builddir}
 tar xf %{_sourcedir}/librsvg-2023-07-21-14-51-52.tar.xz
-cd %{_builddir}/librsvg-2.56.3
+cd %{_builddir}/librsvg-2.56.4
 mkdir -p ./vendor
-cp -r %{_builddir}/librsvg-2023-07-21-14-51-52/* %{_builddir}/librsvg-2.56.3/./vendor
+cp -r %{_builddir}/librsvg-2023-07-21-14-51-52/* %{_builddir}/librsvg-2.56.4/./vendor
 mkdir -p .cargo
 echo '[source.crates-io]' >> .cargo/config.toml
 echo 'replace-with = "vendored-sources"' >> .cargo/config.toml
@@ -139,7 +139,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1690216953
+export SOURCE_DATE_EPOCH=1694636983
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -160,7 +160,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1690216953
+export SOURCE_DATE_EPOCH=1694636983
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/librsvg
 cp %{_builddir}/librsvg-%{version}/COPYING.LIB %{buildroot}/usr/share/package-licenses/librsvg/01a6b4bf79aca9b556822601186afab86e8c4fbf || :
