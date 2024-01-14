@@ -5,7 +5,7 @@
 #
 Name     : librsvg
 Version  : 2.56.4
-Release  : 96
+Release  : 97
 URL      : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.4.tar.xz
 Source0  : https://download.gnome.org/sources/librsvg/2.56/librsvg-2.56.4.tar.xz
 Source1  : http://localhost/cgit/vendor/librsvg/snapshot/librsvg-2023-07-21-14-51-52.tar.xz
