@@ -1,13 +1,209 @@
-Version 2.56.4
+Version 2.58.0
 ==============
+
+librsvg crate version 2.58.0
+
+The most significant change in this release is that librsvg no longer
+uses gdk-pixbuf for loading raster images (for eample, when there is
+an element <image href="foo.jpg"/>.  All image loading uses Rust
+codecs now.  Please see the release notes for 2.57.90 below for more
+details.
+
+Librsvg's gdk-pixbuf loader for SVG documents is unchanged; you can
+still load SVG files from gdk-pixbuf with it as usual.
+
+New features since 2.57.0 (for fine-grained bug fixes, please see the
+release notes for development releases):
+
+- #902 - Add basic support for "ch" length units in CSS (Mackenzie Morgan).
+
+- #997 - Support "var(--foo, #aabbcc)" just for colors.  This is the
+  minimum required to render color SVG emoji fonts that provide color
+  fallbacks, but it is not yet full support for CSS var().
+
+Fixes since the last development release:
+
+- #1062 - Limit numOctaves in feTurbulence to avoid unbounded CPU consumption.
+
+- #1064 - Don't panic when a :lang selector has an argument that is
+  not a language-range (Lukáš Tyrychtr).
+
+Special thanks for this release cycle:
+
+- Thanks to correctmost for doing several rounds of fuzzing, and then
+  found some interesting bugs!
+
+- Thanks to Jordan Petridis for adding CI jobs for testing on
+  gnome-os's regular builds.
+
+- As usual, thanks to Chun-wei Fan for keeping the Windows builds
+  going, and Bilal Elmoussaoui for updating gtk-rs crates.
+
+Version 2.57.92
+===============
+
+librsvg crate version 2.58.0-beta.2
+
+- #1059 - Don't panic when rendering feOffset with a too-large offset.
+
+- #1060 - Don't panic when a decoded image has dimensions of zero.
+
+Version 2.57.91
+===============
+
+librsvg crate version 2.58.0-beta.1
+
+- #943 - Rsvg-convert now prints a helpful message if you run it
+  without arguments, to indicate that it is reading from standard
+  input.
+
+- #902 - Take text orientation into account for 'ch' units
+  (Mackenzie Morgan).
+
+- For Rust programs, the rsvg crate no longer depends on gdk-pixbuf.
+  Hopefully this means that your Rust programs will have to link to
+  one fewer library.
+
+- The C enumeration RsvgUnit now has a RSVG_UNIT_CH variant for "ch"
+  units.  However, this is only used for reporting the size of SVG
+  documents, which should very seldom come in "ch" units.
+
+- #1055 - Fix unsoundness in the use of the selectors crate.
+
+- Update gtk-rs crates (Bilal Elmoussaoui).
+
+Version 2.57.90
+===============
+
+librsvg crate version 2.58.0-beta.0
+
+- Librsvg no longer uses gdk-pixbuf for loading raster images; all
+  image loading uses Rust code now.  Older versions of librsvg would
+  use the traditional libpng and libjpeg-turbo libraries, and
+  gdk-pixbuf's own GIF decoder.  Starting with this version of
+  librsvg, it only uses Rust crates for image codecs.
+
+  In addition, librsvg will no longer accept any arbitrary image
+  format that gdk-pixbuf happens to support: the only supported
+  formats for the <image> element are PNG, JPEG, GIF, WEBP, and SVG.
+  (The SVG2 specification only mandates PNG and JPEG.)
+
+  The reasons for using Rust image loaders are as follows:
+
+  - Reduce the attack surface from memory-unsafe libraries.  While
+    libpng/libjpeg-turbo are very well tested and extensively fuzzed,
+    other gdk-pixbuf loaders are not as well tested.  Switching to
+    memory-safe code sounds like a better idea for the future.
+
+  - Make using librsvg easier on Windows and MacOS, where installing
+    gdk-pixbuf is somewhat tricky.
+
+  - Give a chance to the Rust image codecs to improve by having more
+    people test them from a widely-used code base like librsvg.  GNOME
+    has already uses the Rust image crates in the Loupe image viewer,
+    and this has led to fixes in the image crates.
+
+  - Support SVG2 semantics for referencing other SVG documents in an
+    <image> element.  For historical reasons, librsvg just used
+    gdk-pixbuf to recurse into itself in that case.  Now it handles
+    SVG sub-images directly.
+
+  The normal SVG loader for gdk-pixbuf that librsvg installs is
+  unchanged; you can still load SVG images with gdk-pixbuf as usual.
+
+  The refactoring to load images directly in Rust is based on
+  Emile Snyder's work from some months ago.
+
+- #902 - Add basic support for "ch" length units in CSS (Mackenzie Morgan).
+
+- #1019 - Fix small-caps and bump the version of Pango required to 1.50.0.
+
+- #1037 - Handle the case where Cairo returns an empty rectangle for a
+  filled object's bounding box (Henrik Nilsson).
+
+- #1026 - Fix panic when using negative scaling transforms on the
+  toplevel (WhyHelloThere).
+
+- #997 - Support "var(--foo, #aabbcc)" just for colors.  This is the
+  minimum required to render color SVG emoji fonts that provide color
+  fallbacks, but it is not yet full support for CSS var().
+
+- Fix Windows and MacOS builds with respectg to Fontconfig (Alessandro Bono).
+
+- Fix the VS2017 build (Chun-wei Fan).
+
+- Update cairo-rs (Guillaume Gomez).
+
+- Update the project metadata files (Andre Klapper).
+
+
+Version 2.57.0
+==============
+
+librsvg crate version 2.57.0
+
+This is the first stable version of librsvg to be available as a
+Rust crate in crates.io.  Please see the documentaiton at
+https://gnome.pages.gitlab.gnome.org/librsvg/doc/rsvg/index.html
+
+This version of librsvg corresponds to the GNOME 45 release.
+
+These are some user-visible new features since 2.56.  For details,
+look at the release notes from the 2.56.9x development series:
+
+- rsvg-convert can now output PDF versions 1.4, 1.5, 1.6, in addition
+  to the default 1.7, especially for LaTeX users.  See the
+  rsvg-convert(1) man page for options like --format=pdf1.4 (Simon Buttgereit).
+
+- #985 - Support the image-rendering property (nedondev).
+
+- #989 - For consistency with other command-line tools, rsvg-convert
+  now supports an argument "-" to specify the standard input.  This is
+  in addition to the already-supported syntax of not specifying an
+  input file at all (Lukáš Tyrychtr).
+
+- Partial support for the edgeMode attribute in feGaussianBlur, only
+  for small blurs right now.
+
+- The minimum supported Rust version (MSRV) is 1.70.0.
+
+
+Version 2.56.93
+===============
+
+librsvg crate version 2.57.0-beta.3
 
 - #1009 - Fix rsvg-convert man page about overriding styles with
   !important in an external stylesheet.
 
-- Fix aarch64 build.
+- #1008 - Clean up the documentation for the Rust API.
 
-Version 2.56.3
-==============
+- #1012 - RenderingError::InvalidTransform no longer exists; this was
+  not meant to be an error that surfaces to the public API.
+
+- Update cssparser and selectors crates (Lukáš Tyrychtr, Federico Mena).
+
+- Remove unnecessary dependencies (Uli Schlachter).
+
+Version 2.56.92
+===============
+
+librsvg crate version 2.57.0-beta.2
+
+- #991 - Fix the build for aarch64.
+
+- More extensive logging for filter primitives.
+
+- Update gtk-rs-core to 0.18 (Bilal Elmoussaoui).
+
+- Update dependencies (Sophie Herold, Kalev Lember).
+
+- Include license text in packaged crates (Davide Cavalca).
+
+- The minimum supported Rust version (MSRV) is 1.70.0, due to the gtk-rs-core update.
+
+Version 2.56.91
+===============
 
 This is a security release for bug #996.
 
@@ -15,22 +211,55 @@ This is a security release for bug #996.
 
 - #998 - Fix cascade for symbol elements being referenced from use elements.
 
-Version 2.56.2
-==============
+- rsvg-convert can now output PDF versions 1.4, 1.5, 1.6, in addition
+  to the default 1.7, especially for LaTeX users.  See the
+  rsvg-convert(1) man page for options like --format=pdf1.4 (Simon Buttgereit).
 
-- Windows build fixes (Chun-wei Fan).
+- #664 - Rename the Rust crate to "rsvg", in preparation for crates.io
+  (Sophie Herold).
 
-Version 2.56.1
-==============
+- The minimum supported Rust version (MSRV) is 1.66.0.
 
-- The minimum supported Rust version (MSRV) is 1.65.  Unfortunately
-  the assert_cmd crate, used in the test suite, bumped its MSRV and is
-  forcing us to do the same.
+Version 2.56.90
+===============
 
-- #965 - Shrink the shared library by telling the linker to omit
-  unused code (Sebastian Dröge).
+This version of librsvg depends on Cairo 1.17.0 or later, to make it
+more reliable on Windows.  Also, that version of Cairo fixes a lot of
+crashers when using out-of-bounds coordinates in paths.
 
-- Updates to dependencies (Lukáš Tyrychtr, Kalev Lember).
+- #985 - Support the image-rendering property (nedondev).
+
+- #989 - For consistency with other command-line tools, rsvg-convert
+  now supports an argument "-" to specify the standard input.  This is
+  in addition to the already-supported syntax of not specifying an
+  input file at all (Lukáš Tyrychtr).
+
+- #965 - Shrink the shared library by telling the linker to omit unused
+  code (Sebastian Dröge).
+
+- #950 - Massive reorganization of the source tree.  With this, Rust
+  programs like Loupe can avoid including the dependencies that
+  librsvg only uses for rsvg-convert (Sophie Herold, Federico Mena
+  Quintero, Chun-wei Fan, Michael Catanzaro, Abderrahim Kitouni).
+
+- Partial support for the edgeMode attribute in feGaussianBlur, only
+  for small blurs right now.
+
+- Update dependencies (Lukáš Tyrychtr, Kalev Lember)).
+
+- Librsvg now runs its CI on Windows with MSVC!!! (Chun-wei Fan).
+
+- Lots of build fixes for Windows (Chun-wei Fan, Kleis Auke Wolthuizen).
+
+- Lots of internal refactoring to allow fixing long-standing bugs.
+  Nothing is user-visible yet.
+
+- #966 - Fix a bunch of broken links in the documentation; we have a link
+  checker now for the development guide.
+
+Special thanks to Sophie Herold for jumpstarting the source
+reorganization, and Chun-wei Fan for being patient with Windows build
+problems and for actually implementing CI for MSVC.
 
 Version 2.56.0
 ==============
