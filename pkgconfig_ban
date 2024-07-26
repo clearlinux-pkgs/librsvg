@@ -6,3 +6,5 @@ gtk+-3.0
 32gio-windows-2.0
 32gtk+-3.0
 32\	gdk-pixbuf-2.0
+gio-${gio_backend}-2.0
+32gio-${gio_backend}-2.0
